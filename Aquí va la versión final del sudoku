@@ -15,24 +15,25 @@ typedef struct juego JUEGO;
 int menu(void);
 int** tablero_inicial(void);
 int** imprime_juegoactual(int **arr);
-void ingresa_numero(int **);
+void ingresa_numero(int **,int **);
 bool verificaCasilla_ingresada(int **,int,int,int);
 
 
 int main(){//Inicio del main
 	
 	int juega=0,i=0;
-	int **ptr_tablero;
+	int **ptr_tablero,**tablero_valido;
 	P("BIENVENIDO AL SUDOUKU\n Presione 0 para empezar:");
 	S("%d",&juega);
 	P("TABLERO INICIAL:\n");
 	ptr_tablero=tablero_inicial();
+	tablero_valido=ptr_tablero;
 	juega=menu();
 	
 	while(juega!=4){
 		switch(juega){
 			case 1:
-				ingresa_numero(ptr_tablero);
+				ingresa_numero(ptr_tablero,tablero_valido);
 				juega=menu();
 				break;
 			case 2:
@@ -88,18 +89,22 @@ int menu(void){
 	return opcion;
 }
 
-void ingresa_numero(int **tablero){
+void ingresa_numero(int **tablero,int **copiaTableroInicial){
 	
 	int fila=0,columna=0,numero;
 	P("SELECCIONASTE INGRESAR NUMERO AL TABLERO:\n");
 	P("Indique la fila (1-9): ");
 	S("%d",&fila);
 	P("Indique la columna (1-9): ");
-	S("%d",&columna);
+	S("%d",&columna);	
 	P("Ingrese el numero para la casilla (%d,%d):",fila,columna);
 	S("%d",&numero);
 	
-	if(verificaCasilla_ingresada(tablero,fila,columna,numero)){
+	if(copiaTableroInicial[fila-1][columna-1]!=0){
+	P("Numero no valido, no modifiques los valores iniciales por favor.\n");
+	}
+	 
+	else if(verificaCasilla_ingresada(tablero,fila-1,columna-1,numero)&&(numero<9&&numero>1)){
 		tablero[fila-1][columna-1]=numero;
 		P("El numero fue agregado exitosamente.\n");
 	}
@@ -110,7 +115,7 @@ void ingresa_numero(int **tablero){
 }
 
 bool verificaCasilla_ingresada(int **tablero, int fil, int col, int num) {
-    // Verificar la fila y la columna
+	// Verificar la fila y la columna
     for (int i = 0; i < 9; i++) {
         if (tablero[fil][i] == num || tablero[i][col] == num) {
             return false; // Número repetido encontrado en la fila o columna
