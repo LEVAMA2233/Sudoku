@@ -20,6 +20,8 @@ bool verificaCasilla_ingresada(const JUEGO *juego, int fil, int col, int num);
 void ingresaNum(JUEGO *juego);
 void guardarPartida(JUEGO *,int, int *, const JUEGO *,char[30]);
 
+void rotaTablero(JUEGO *,int[9][9]);
+
 int main() {
     JUEGO j;
     int opcion,numJugadores,i=0;
@@ -49,7 +51,7 @@ int main() {
 	opcion=menu(i,player);
 
 	
-	while(opcion!=5){
+	while(opcion!=6){
 		switch(opcion){
 			case 1:
 				ingresaNum(&j);
@@ -71,6 +73,10 @@ int main() {
 				system("cls");
 				break;
 			case 5:
+				rotaTablero(&j,tablero_inicial);
+				P("Tu tablero ha sido rotado.\n");
+				break;
+			case 6:
 				return 0;
 		}
 		opcion=menu(i,player);
@@ -84,7 +90,7 @@ int menu(int x,char nombre[30]){
 	P("Bienvenido al Sudoku! %s\n",nombre);
     P("\nPresione el numero indicado en las opciones del menu, presione 4 para guardar y salir.\n");
 	P("\nMENU DE JUEGO:\n 1-$ Ingresa valor al tablero.\n2-$ Imprimir estado actual del juego\n3-$ Guardar partida\n"
-	"4-$ Borrar pantalla\n");
+	"4-$ Borrar pantalla\n5-$ Rotar tablero.\n ");
 	P("$:");S("%d",&opc);
 	return opc;
 }
@@ -158,3 +164,13 @@ void guardarPartida(JUEGO *partidas,int a,int *partidasGuardadas, const JUEGO *j
     strcpy(partidas[a].nombre, nombre);
     P("Partida guardada exitosamente.\n");
 }
+
+void rotaTablero(JUEGO *juego,int tabInicial[9][9]){
+	for(int i=8;i>=0;i--){
+    	for(int j=0;j<9;j++){
+    		juego->tablero[j][8-i]=tabInicial[i][j];
+		}
+	}
+}
+
+
