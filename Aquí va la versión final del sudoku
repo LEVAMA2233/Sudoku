@@ -16,7 +16,7 @@ typedef struct juego JUEGO;
 
 int menu(int x); void establecer_tablero(JUEGO *juego, int tablero_inicial[9][9]);
 void imprimir_tablero(const JUEGO *juego); bool verificaCasilla_ingresada(const JUEGO *juego, int fil, int col, int num);
-void ingresaNum(JUEGO *juego);
+void ingresaNum(JUEGO *juego);void guardarPartida(JUEGO *, int *, const JUEGO *);
 
 int main() {
     JUEGO j;
@@ -38,6 +38,7 @@ int main() {
     	P("Surgio un error en la asignacion de memoria.");
     	return 1;
 	}
+	establecer_tablero(&j,tablero_inicial);
 	imprimir_tablero(&j);
 	opcion=menu(i);
 	
@@ -47,10 +48,15 @@ int main() {
 				ingresaNum(&j);
 				break;
 			case 2:
+				P("\nSeleccionaste imprimir tablero\n");
+				P("//////////////////////////////////\n");
 				imprimir_tablero(&j);
 				break;
 			case 3:
-			
+				guardarPartida(partidas,&i,&j);
+				system("cls");
+				P("El juego se ha reiniciado para el nuevo jugador.\n");
+				establecer_tablero(&j,tablero_inicial);
 				break;
 			case 5:
 				return 0;
@@ -108,7 +114,7 @@ bool verificaCasilla_ingresada(const JUEGO *juego, int fil, int col, int num) {
         }
     }
 
-    return true; // Número válido para la casilla
+    return true; 
 }
 
 void ingresaNum(JUEGO *juego) {
@@ -127,8 +133,16 @@ void ingresaNum(JUEGO *juego) {
 
         if (juego->tablero[fila - 1][columna - 1] == 0 && verificaCasilla_ingresada(juego, fila - 1, columna - 1, valor)) {
             juego->tablero[fila - 1][columna - 1] = valor;
-            P("Numero agregado exitosamente,\n");
+            P("Numero agregado exitosamente.\n");
+            P("--------------------------------\n");
         } else {
             P("Número no válido o casilla ocupada. Por favor, ingrese otro valor.\n");
         }
 }
+
+void guardarPartida(JUEGO *partidas, int *partidasGuardadas, const JUEGO *juego) {
+    partidas[*partidasGuardadas] = *juego; // Guardar el estado actual del juego en el arreglo de partidas
+    (*partidasGuardadas)++; // Incrementar el contador de partidas guardadas, cambiamos el valor de i que esta en el main
+    P("Partida guardada exitosamente.\n");
+}
+
