@@ -1,123 +1,99 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include<string.h>
 
 #define P printf
 #define S scanf
 
-struct juego{
-	int tablero[9][9];//tablero actual del juego
-	char jugador[30];//nombre del jugador
+struct juego {
+    int tablero[9][9];
+    char nombre;//nombre del jugador
+    int numHistorial;
 };
 
 typedef struct juego JUEGO;
 
-int menu(void);
-int** tablero_inicial(void);
-int** imprime_juegoactual(int **arr);
-void ingresa_numero(int **,int **);
-bool verificaCasilla_ingresada(int **,int,int,int);
+int menu(int x); void establecer_tablero(JUEGO *juego, int tablero_inicial[9][9]);
+void imprimir_tablero(const JUEGO *juego); bool verificaCasilla_ingresada(const JUEGO *juego, int fil, int col, int num);
+void ingresaNum(JUEGO *juego);
 
-
-int main(){//Inicio del main
+int main() {
+    JUEGO j;
+    int opcion,numJugadores,i=0;
+    int tablero_inicial[9][9] = {
+        {5, 0, 0, 0, 7, 0, 0, 0, 0},
+        {6, 0, 0, 1, 9, 5, 0, 0, 0},
+        {0, 9, 8, 0, 0, 0, 0, 6, 0},
+        {8, 0, 0, 0, 6, 0, 0, 0, 3},
+        {4, 0, 0, 8, 0, 3, 0, 0, 1},
+        {7, 0, 0, 0, 2, 0, 0, 0, 6},
+        {0, 6, 0, 0, 0, 0, 2, 8, 0},
+        {0, 0, 0, 4, 1, 9, 0, 0, 5},
+        {0, 0, 0, 0, 8, 0, 0, 7, 9}
+    };
+    P("¿Cuantos jugadores son?: ");S("%d",&numJugadores);
+    JUEGO *partidas=(JUEGO *)malloc(numJugadores*sizeof(JUEGO));
+    if(partidas==NULL){
+    	P("Surgio un error en la asignacion de memoria.");
+    	return 1;
+	}
+	imprimir_tablero(&j);
+	opcion=menu(i);
 	
-	int juega=0,i=0;
-	int **ptr_tablero,**tablero_valido;
-	P("BIENVENIDO AL SUDOUKU\n Presione 0 para empezar:");
-	S("%d",&juega);
-	P("TABLERO INICIAL:\n");
-	ptr_tablero=tablero_inicial();
-	tablero_valido=ptr_tablero;
-	juega=menu();
-	
-	while(juega!=4){
-		switch(juega){
+	while(opcion!=5){
+		switch(opcion){
 			case 1:
-				ingresa_numero(ptr_tablero,tablero_valido);
-				juega=menu();
+				ingresaNum(&j);
 				break;
 			case 2:
-				imprime_juegoactual(ptr_tablero);
-				juega=menu();
+				imprimir_tablero(&j);
 				break;
-				
-			i++;
-			default:
-			juega=menu();
+			case 3:
+			
+				break;
+			case 5:
+				return 0;
 		}
+		opcion=menu(i);
 	}
-	
-	return 0;
-}//Fin del main
 
-int** tablero_inicial(){
-	
-	int** tab=(int **)malloc(9 * sizeof(int *));//Reservas memoria para cada fila
-	 for (int i = 0; i < 9; i++) {
-        tab[i] = (int *)malloc(9 * sizeof(int)); // Reservas memoria para cada columna
-    }
-    
-	tab[0][0]=5;tab[1][0]=6;tab[2][0]=0;tab[3][0]=8;tab[4][0]=4;tab[5][0]=7;tab[6][0]=0;tab[7][0]=0;tab[8][0]=0;
-	tab[0][1]=0;tab[1][1]=0;tab[2][1]=9;tab[3][1]=0;tab[4][1]=0;tab[5][1]=0;tab[6][1]=6;tab[7][1]=0;tab[8][1]=0;
-	tab[0][2]=0;tab[1][2]=0;tab[2][2]=8;tab[3][2]=0;tab[4][2]=0;tab[5][2]=0;tab[6][2]=0;tab[7][2]=0;tab[8][2]=0;
-	tab[0][3]=0;tab[1][3]=1;tab[2][3]=0;tab[3][3]=0;tab[4][3]=8;tab[5][3]=0;tab[6][3]=0;tab[7][3]=4;tab[8][3]=0;
-	tab[0][4]=7;tab[1][4]=9;tab[2][4]=0;tab[3][4]=6;tab[4][4]=0;tab[5][4]=2;tab[6][4]=0;tab[7][4]=1;tab[8][4]=8;
-	tab[0][5]=0;tab[1][5]=5;tab[2][5]=0;tab[3][5]=0;tab[4][5]=3;tab[5][5]=0;tab[6][5]=0;tab[7][5]=9;tab[8][5]=0;
-	tab[0][6]=0;tab[1][6]=0;tab[2][6]=0;tab[3][6]=0;tab[4][6]=0;tab[5][6]=0;tab[6][6]=2;tab[7][6]=0;tab[8][6]=0;
-	tab[0][7]=0;tab[1][7]=0;tab[2][7]=6;tab[3][7]=0;tab[4][7]=0;tab[5][7]=0;tab[6][7]=8;tab[7][7]=0;tab[8][7]=7;
-	tab[0][8]=0;tab[1][8]=0;tab[2][8]=0;tab[3][8]=3;tab[4][8]=1;tab[5][8]=6;tab[6][8]=0;tab[7][8]=5;tab[8][8]=9;
-	imprime_juegoactual(tab);
-	return tab;
+    return 0;
 }
 
-int** imprime_juegoactual(int **arr){
-	for (int i = 0; i < 9; i++) {
-        for (int j = 0; j < 9; j++) {
-            printf("%d ", arr[i][j]);
-        }
-        printf("\n");
-    }
-    return arr;
+int menu(int x){
+	int opc;
+	P("Bienvenido al Sudoku! \n");
+    P("\nPresione el numero indicado en las opciones del menu, presione 4 para guardar y salir.\n");
+	P("\nMENU DE JUEGO:\n 1-$ Ingresa valor al tablero.\n2-$ Imprimir estado actual del juego\n3-$ Guardar partida\n"
+	"4-$ Cambiar jugador (Guardado automatico)\n");
+	P("$:");S("%d",&opc);
+	return opc;
 }
 
-int menu(void){
-	int opcion;
-	P("\nPresione el numero indicado en las opciones del menu, presione 4 para guardar y salir.\n");
-	P("\nMENU DE JUEGO:\n 1-$ Ingresa valor al tablero.\n2-$ Imprimir estado actual del juego\n3-$ Cambiar valor ingresado\n"
-	"4-$ Salir (Guardado automatico)\n");
-	P("$:");S("%d",&opcion);
-	return opcion;
-}
-
-void ingresa_numero(int **tablero,int **copiaTableroInicial){
-	
-	int fila=0,columna=0,numero;
-	P("SELECCIONASTE INGRESAR NUMERO AL TABLERO:\n");
-	P("Indique la fila (1-9): ");
-	S("%d",&fila);
-	P("Indique la columna (1-9): ");
-	S("%d",&columna);	
-	P("Ingrese el numero para la casilla (%d,%d):",fila,columna);
-	S("%d",&numero);
-	
-	if(copiaTableroInicial[fila-1][columna-1]!=0){
-	P("Numero no valido, no modifiques los valores iniciales por favor.\n");
-	}
-	 
-	else if(verificaCasilla_ingresada(tablero,fila-1,columna-1,numero)&&(numero<9&&numero>1)){
-		tablero[fila-1][columna-1]=numero;
-		P("El numero fue agregado exitosamente.\n");
-	}
-	else{
-		P("Numero no valido, vuelva a intentarlo.\n");
-	}
-	
-}
-
-bool verificaCasilla_ingresada(int **tablero, int fil, int col, int num) {
-	// Verificar la fila y la columna
+void establecer_tablero(JUEGO *juego, int tablero_inicial[9][9]) {
+    // Establecer el tablero inicial con los valores proporcionados
     for (int i = 0; i < 9; i++) {
-        if (tablero[fil][i] == num || tablero[i][col] == num) {
+        for (int j = 0; j < 9; j++) {
+            juego->tablero[i][j] = tablero_inicial[i][j];
+        }
+    }
+}
+
+void imprimir_tablero(const JUEGO *juego) {
+    P("Tablero:\n");
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            P("%d ", juego->tablero[i][j]);
+        }
+        P("\n");
+    }
+}
+
+bool verificaCasilla_ingresada(const JUEGO *juego, int fil, int col, int num) {
+    // Verificar la fila y la columna
+    for (int i = 0; i < 9; i++) {
+        if (juego->tablero[fil][i] == num || juego->tablero[i][col] == num) {
             return false; // Número repetido encontrado en la fila o columna
         }
     }
@@ -126,11 +102,33 @@ bool verificaCasilla_ingresada(int **tablero, int fil, int col, int num) {
     int inicioCol = col - col % 3;
     for (int i = inicioFila; i < inicioFila + 3; i++) {
         for (int j = inicioCol; j < inicioCol + 3; j++) {
-            if (tablero[i][j] == num) {
+            if (juego->tablero[i][j] == num) {
                 return false; // Número repetido encontrado en el cuadrante 3x3
             }
         }
     }
 
     return true; // Número válido para la casilla
+}
+
+void ingresaNum(JUEGO *juego) {
+    int fila, columna, valor;
+
+        P("\nIngrese la fila (1-9):");
+        S("%d", &fila);
+        P("Ingresa la columna (1-9):");
+        S("%d",&columna);
+        P("Ingrese el numero para la casilla (%d,%d)",fila,columna);
+        S("%d",&valor);
+        if (fila < 1 || fila > 9 || columna < 1 || columna > 9 || valor < 1 || valor > 9) {
+            P("Entrada no válida. Por favor, ingrese valores válidos.\n");
+            
+        }
+
+        if (juego->tablero[fila - 1][columna - 1] == 0 && verificaCasilla_ingresada(juego, fila - 1, columna - 1, valor)) {
+            juego->tablero[fila - 1][columna - 1] = valor;
+            P("Numero agregado exitosamente,\n");
+        } else {
+            P("Número no válido o casilla ocupada. Por favor, ingrese otro valor.\n");
+        }
 }
