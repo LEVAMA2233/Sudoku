@@ -8,19 +8,22 @@
 
 struct juego {
     int tablero[9][9];
-    char nombre;//nombre del jugador
-    int numHistorial;
+    char nombre[30];//nombre del jugador
 };
 
 typedef struct juego JUEGO;
 
-int menu(int x); void establecer_tablero(JUEGO *juego, int tablero_inicial[9][9]);
-void imprimir_tablero(const JUEGO *juego); bool verificaCasilla_ingresada(const JUEGO *juego, int fil, int col, int num);
-void ingresaNum(JUEGO *juego);void guardarPartida(JUEGO *, int *, const JUEGO *);
+int menu(int x,char[]); 
+void establecer_tablero(JUEGO *juego, int tablero_inicial[9][9]);
+void imprimir_tablero(const JUEGO *juego); 
+bool verificaCasilla_ingresada(const JUEGO *juego, int fil, int col, int num);
+void ingresaNum(JUEGO *juego);
+void guardarPartida(JUEGO *,int, int *, const JUEGO *,char[30]);
 
 int main() {
     JUEGO j;
     int opcion,numJugadores,i=0;
+    char player[30];
     int tablero_inicial[9][9] = {
         {5, 0, 0, 0, 7, 0, 0, 0, 0},
         {6, 0, 0, 1, 9, 5, 0, 0, 0},
@@ -33,14 +36,18 @@ int main() {
         {0, 0, 0, 0, 8, 0, 0, 7, 9}
     };
     P("¿Cuantos jugadores son?: ");S("%d",&numJugadores);
-    JUEGO *partidas=(JUEGO *)malloc(numJugadores*sizeof(JUEGO));
+    
+    JUEGO *partidas=(JUEGO *)malloc(numJugadores*sizeof(JUEGO));//Asignamos un arreglo de estructuras dinámico
     if(partidas==NULL){
     	P("Surgio un error en la asignacion de memoria.");
     	return 1;
 	}
 	establecer_tablero(&j,tablero_inicial);
 	imprimir_tablero(&j);
-	opcion=menu(i);
+	P("Nombre del jugador %d: ",i+1);S("%s",partidas[i].nombre);
+	strcpy(player,partidas[i].nombre);
+	opcion=menu(i,player);
+
 	
 	while(opcion!=5){
 		switch(opcion){
@@ -53,26 +60,31 @@ int main() {
 				imprimir_tablero(&j);
 				break;
 			case 3:
-				guardarPartida(partidas,&i,&j);
+				guardarPartida(partidas,i,&i,&j,partidas[i].nombre);
+				P("Ingrese el nombre del nuevo jugador: ");S("%s",&partidas[i].nombre);
+				strcpy(player,partidas[i].nombre);
 				system("cls");
 				P("El juego se ha reiniciado para el nuevo jugador.\n");
-				establecer_tablero(&j,tablero_inicial);
+				establecer_tablero(&j,tablero_inicial);//Reiniciamos al tablero inicial
+				break;
+			case 4:
+				system("cls");
 				break;
 			case 5:
 				return 0;
 		}
-		opcion=menu(i);
+		opcion=menu(i,player);
 	}
 
     return 0;
 }
 
-int menu(int x){
+int menu(int x,char nombre[30]){
 	int opc;
-	P("Bienvenido al Sudoku! \n");
+	P("Bienvenido al Sudoku! %s\n",nombre);
     P("\nPresione el numero indicado en las opciones del menu, presione 4 para guardar y salir.\n");
 	P("\nMENU DE JUEGO:\n 1-$ Ingresa valor al tablero.\n2-$ Imprimir estado actual del juego\n3-$ Guardar partida\n"
-	"4-$ Cambiar jugador (Guardado automatico)\n");
+	"4-$ Borrar pantalla\n");
 	P("$:");S("%d",&opc);
 	return opc;
 }
@@ -127,7 +139,7 @@ void ingresaNum(JUEGO *juego) {
         P("Ingrese el numero para la casilla (%d,%d)",fila,columna);
         S("%d",&valor);
         if (fila < 1 || fila > 9 || columna < 1 || columna > 9 || valor < 1 || valor > 9) {
-            P("Entrada no válida. Por favor, ingrese valores válidos.\n");
+            P("Entrada no valida. Por favor, ingrese valores validos.\n");
             
         }
 
@@ -136,13 +148,13 @@ void ingresaNum(JUEGO *juego) {
             P("Numero agregado exitosamente.\n");
             P("--------------------------------\n");
         } else {
-            P("Número no válido o casilla ocupada. Por favor, ingrese otro valor.\n");
+            P("Numero no valido o casilla ocupada. Por favor, ingrese otro valor.\n");
         }
 }
 
-void guardarPartida(JUEGO *partidas, int *partidasGuardadas, const JUEGO *juego) {
+void guardarPartida(JUEGO *partidas,int a,int *partidasGuardadas, const JUEGO *juego,char nombre[30]) {
     partidas[*partidasGuardadas] = *juego; // Guardar el estado actual del juego en el arreglo de partidas
     (*partidasGuardadas)++; // Incrementar el contador de partidas guardadas, cambiamos el valor de i que esta en el main
+    strcpy(partidas[a].nombre, nombre);
     P("Partida guardada exitosamente.\n");
 }
-
