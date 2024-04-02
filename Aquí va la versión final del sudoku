@@ -12,21 +12,19 @@ struct juego {
 };
 
 typedef struct juego JUEGO;
-
+//Funciones para el funcionamiento del sudoku
 int menu(int x,char[]); 
-void establecer_tablero(JUEGO *juego, int tablero_inicial[9][9]);
-void imprimir_tablero(const JUEGO *juego); 
+void establecer_tablero(JUEGO *juego);
+void imprimir_tablero( JUEGO *juego); 
 bool verificaCasilla_ingresada(const JUEGO *juego, int fil, int col, int num);
 void ingresaNum(JUEGO *juego);
 void guardarPartida(JUEGO *,int, int *, const JUEGO *,char[30]);
-
+void modifica_casilla(JUEGO *juego,int,int,int);
+void cargarPartida(JUEGO *juego, char nombre[30]);
+//Funciones para la elaboración de nuevos juegos
 void rotaTablero(JUEGO *,int[9][9]);
 
-int main() {
-    JUEGO j;
-    int opcion,numJugadores,i=0;
-    char player[30];
-    int tablero_inicial[9][9] = {
+int tablero_inicial[9][9] = {
         {5, 0, 0, 0, 7, 0, 0, 0, 0},
         {6, 0, 0, 1, 9, 5, 0, 0, 0},
         {0, 9, 8, 0, 0, 0, 0, 6, 0},
@@ -36,47 +34,87 @@ int main() {
         {0, 6, 0, 0, 0, 0, 2, 8, 0},
         {0, 0, 0, 4, 1, 9, 0, 0, 5},
         {0, 0, 0, 0, 8, 0, 0, 7, 9}
-    };
-    P("¿Cuantos jugadores son?: ");S("%d",&numJugadores);
+    };//El tablero inicial es variable global, podemos acceder a este desde cualquier función
+
+int main() {
+    JUEGO j;
+	int a,b,numero;
+    int opcion,numJugadores,i=0;//la variable i es el indice con el que identificamos al jugador en el arreglo partidas
+    char player[30];
+    P("Ingrese la cantidad de jugadores: ");S("%d",&numJugadores);
     
     JUEGO *partidas=(JUEGO *)malloc(numJugadores*sizeof(JUEGO));//Asignamos un arreglo de estructuras dinámico
     if(partidas==NULL){
     	P("Surgio un error en la asignacion de memoria.");
     	return 1;
 	}
-	establecer_tablero(&j,tablero_inicial);
+	establecer_tablero(&j);
 	imprimir_tablero(&j);
-	P("Nombre del jugador %d: ",i+1);S("%s",partidas[i].nombre);
+	P("Nombre del jugador %d: ",i);S("%s",partidas[i].nombre);
 	strcpy(player,partidas[i].nombre);
 	opcion=menu(i,player);
 
 	
-	while(opcion!=6){
+	while(opcion!=8){
 		switch(opcion){
 			case 1:
+				system("cls");
+				imprimir_tablero(&j);
+				P("\n----------------------------------------------");
+				P("\nSeleccionaste Ingresar un numero al tablero\n");
 				ingresaNum(&j);
 				break;
 			case 2:
-				P("\nSeleccionaste imprimir tablero\n");
-				P("//////////////////////////////////\n");
+				system("cls");
+				P("\nSELECCIONASTE IMPRIMIR EL TABLERO ACTUAL\n");
+				P("||||||||||||||||||||||||||||||||||||||||\n");
 				imprimir_tablero(&j);
 				break;
 			case 3:
+				system("cls");
 				guardarPartida(partidas,i,&i,&j,partidas[i].nombre);
 				P("Ingrese el nombre del nuevo jugador: ");S("%s",&partidas[i].nombre);
 				strcpy(player,partidas[i].nombre);
 				system("cls");
 				P("El juego se ha reiniciado para el nuevo jugador.\n");
-				establecer_tablero(&j,tablero_inicial);//Reiniciamos al tablero inicial
+				establecer_tablero(&j);//Reiniciamos al tablero inicial
 				break;
 			case 4:
 				system("cls");
+				imprimir_tablero(&j);
+				P("Ingresa la fila de la casilla a modificar: ");
+				S("%d",&a);
+				P("Ingresa la columna de la casilla a modificar: ");
+				S("%d",&b);
+				if(a<1||a>9||b<1||b>9){
+					P("Fila y/o casilla no valida.\n");
+				}
+				else{
+					P("Ingresa el numero para la casilla (%d,%d): ",a,b);
+					S("%d",&numero);
+					if(numero<1||numero>9){
+						P("Numero no valido.\n");
+					}
+					else if(tablero_inicial[a-1][b-1]==0&&j.tablero[a-1][b-1]!=0){
+						modifica_casilla(&j,a-1,b-1,numero);
+					}
+					else
+					P("Accion no valida, no modifiques las casillas iniciales o casillas con valor cero.\n");
+				}
 				break;
 			case 5:
-				rotaTablero(&j,tablero_inicial);
-				P("Tu tablero ha sido rotado.\n");
+				system("cls");
 				break;
 			case 6:
+				cargarPartida(&j, partidas[i].nombre);
+				break;
+			case 7:
+				system("cls");
+				rotaTablero(&j,tablero_inicial);
+				P("<<<<<|Tu tablero ha sido rotado|>>>>>.\n");
+				break;
+			case 8:
+				free(partidas);
 				return 0;
 		}
 		opcion=menu(i,player);
@@ -88,30 +126,35 @@ int main() {
 int menu(int x,char nombre[30]){
 	int opc;
 	P("Bienvenido al Sudoku! %s\n",nombre);
-    P("\nPresione el numero indicado en las opciones del menu, presione 4 para guardar y salir.\n");
+    P("\nPresione el numero indicado en las opciones del menu, presione 7 para guardar y salir.\n");
 	P("\nMENU DE JUEGO:\n 1-$ Ingresa valor al tablero.\n2-$ Imprimir estado actual del juego\n3-$ Guardar partida\n"
-	"4-$ Borrar pantalla\n5-$ Rotar tablero.\n ");
+	"4-$ Modificar casilla\n5-$ Borrar pantalla.\n OPCIONES PARA NUEVOS JUEGOS:\n6-$ Cargar partida.\n"
+	"7-$ Rotar tablero.\n");
 	P("$:");S("%d",&opc);
 	return opc;
 }
 
-void establecer_tablero(JUEGO *juego, int tablero_inicial[9][9]) {
+void establecer_tablero(JUEGO *juego) {
     // Establecer el tablero inicial con los valores proporcionados
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
             juego->tablero[i][j] = tablero_inicial[i][j];
         }
     }
-}
+}//Esta función se puede mandar a llamar siempre que se requiera reestablecer los valores iniciales del tablero
 
-void imprimir_tablero(const JUEGO *juego) {
-    P("Tablero:\n");
+
+void imprimir_tablero( JUEGO *juego) {//EL apuntador recibe la dirección de memoria de la variable j en el main
+    P("\nTablero:\n");                     //A su vez este apuntador apunta a la estructura JUEGO
+    P("1 2 3 4 5 6 7 8 9\n"
+	"- - - - - - - - - -\n");
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
             P("%d ", juego->tablero[i][j]);
         }
-        P("\n");
+        P("|%d\n", i+1);
     }
+    P("- - - - - - - - - -\n");
 }
 
 bool verificaCasilla_ingresada(const JUEGO *juego, int fil, int col, int num) {
@@ -142,35 +185,100 @@ void ingresaNum(JUEGO *juego) {
         S("%d", &fila);
         P("Ingresa la columna (1-9):");
         S("%d",&columna);
-        P("Ingrese el numero para la casilla (%d,%d)",fila,columna);
+        P("Ingrese el numero para la casilla (%d,%d):",fila,columna);
         S("%d",&valor);
-        if (fila < 1 || fila > 9 || columna < 1 || columna > 9 || valor < 1 || valor > 9) {
-            P("Entrada no valida. Por favor, ingrese valores validos.\n");
+        if ((fila < 1 || fila > 9 || columna < 1 || columna > 9) || (valor < 1 || valor > 9)) {
+            P("Entrada no valida. Por favor, ingrese valores validos para la casilla [1-9].\n");
             
         }
-
-        if (juego->tablero[fila - 1][columna - 1] == 0 && verificaCasilla_ingresada(juego, fila - 1, columna - 1, valor)) {
+        else if (juego->tablero[fila - 1][columna - 1] == 0 && verificaCasilla_ingresada(juego, fila - 1, columna - 1, valor)) {
             juego->tablero[fila - 1][columna - 1] = valor;
+            P("\n-------------------------------\n");
             P("Numero agregado exitosamente.\n");
             P("--------------------------------\n");
-        } else {
-            P("Numero no valido o casilla ocupada. Por favor, ingrese otro valor.\n");
+        } 
+		else {
+            P("El numero esta repetido o intentaste modificar una casilla inicial. Por favor, ingrese otro valor.\n");
         }
 }
 
 void guardarPartida(JUEGO *partidas,int a,int *partidasGuardadas, const JUEGO *juego,char nombre[30]) {
     partidas[*partidasGuardadas] = *juego; // Guardar el estado actual del juego en el arreglo de partidas
-    (*partidasGuardadas)++; // Incrementar el contador de partidas guardadas, cambiamos el valor de i que esta en el main
+    (*partidasGuardadas)++; // Incrementar el contador de partidas guardadas, cambiamos el valor de i que esta en el main,con paso por referencia
     strcpy(partidas[a].nombre, nombre);
     P("Partida guardada exitosamente.\n");
+    
+    char filename[40];
+    FILE *file;
+
+    // Construir el nombre del archivo con el nombre del jugador y un sufijo .txt
+    snprintf(filename, sizeof(filename),"%s.txt",nombre);
+
+    // Intentar abrir/crear el archivo en modo escritura
+    file = fopen(filename, "w");
+    if(file == NULL) {
+        P("No se pudo abrir el archivo para guardar.\n");
+        return;
+    }
+
+    // Escribir el tablero en el archivo
+    for(int i = 0; i < 9; i++) {
+        for(int j = 0; j < 9; j++) {
+            fprintf(file, "%d ", juego->tablero[i][j]);
+        }
+        fprintf(file, "\n");
+    }
+
+    fclose(file); // Cerrar el archivo
+    P("Partida guardada exitosamente en %s.\n", filename);
 }
 
 void rotaTablero(JUEGO *juego,int tabInicial[9][9]){
+
 	for(int i=8;i>=0;i--){
     	for(int j=0;j<9;j++){
     		juego->tablero[j][8-i]=tabInicial[i][j];
 		}
 	}
+}
+
+void modifica_casilla(JUEGO *juego,int a,int b,int num){
+	int aux;
+	aux=juego->tablero[a][b];
+	juego->tablero[a][b]=num;
+	P("\n-----------------------------------------\n");
+	P("-----Haz modificado la casilla (%d,%d)=%d!!!\n",a+1,b+1,aux);
+	P("-----Su nuevo valor es (%d,%d)=%d!!!",a+1,b+1,num);
+	P("\n-----------------------------------------\n");
+}
+
+void cargarPartida(JUEGO *juego, char nombre[30]) {
+    char filename[40];
+    FILE *file;
+
+    // Construir el nombre del archivo con el nombre del jugador y un sufijo .txt
+    snprintf(filename, sizeof(filename), "%s.txt", nombre);
+
+    // Intentar abrir el archivo en modo lectura
+    file = fopen(filename, "r");
+    if(file == NULL) {
+        P("No se pudo abrir el archivo para cargar.\n");
+        return;
+    }
+
+    // Leer el tablero del archivo
+    for(int i = 0; i < 9; i++) {
+        for(int j = 0; j < 9; j++) {
+            if (fscanf(file, "%d", &juego->tablero[i][j]) != 1) {
+                P("Error al leer el archivo. El formato del archivo podría ser incorrecto.\n");
+                fclose(file); // Es importante cerrar el archivo si ocurre un error durante la lectura
+                return;
+            }
+        }
+    }
+
+    fclose(file); // Cerrar el archivo después de cargar con éxito
+    P("Partida cargada exitosamente desde %s.\n", filename);
 }
 
 
