@@ -9,7 +9,7 @@
 struct juego {
     int tablero[9][9];
     char nombre[30];//nombre del jugador
-    int num_modificaciones=0;//Indica cuantas modificaciones válidas ha realizado el usuario
+    int num_modificaciones;//Indica cuantas modificaciones válidas ha realizado el usuario
     int calificacion;//Le asigna una calificacion del usuario al resolver el sudoku dependiendo de cuantas modificaciones hizo
 };
 
