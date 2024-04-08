@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include<string.h>
+#include<time.h>
 
 #define P printf
 #define S scanf
@@ -27,6 +28,8 @@ bool ganaste(JUEGO *);
 //Funciones para la elaboración de nuevos juegos
 void rotaTablero(JUEGO *);
 void intercambia_numeros(JUEGO *);
+void intercambia_filas_columnas(JUEGO *);
+void borraNums(JUEGO *);
 
 int tablero_inicial[9][9] = {
        {5, 0, 0, 0, 7, 0, 0, 0, 0},
@@ -40,22 +43,35 @@ int tablero_inicial[9][9] = {
         {0, 0, 0, 0, 8, 0, 0, 7, 9}
     };//El tablero inicial es variable global, podemos acceder a este desde cualquier función
 int tablero2[9][9]= {
-		{0, 0, 4, 3, 0, 0, 0, 0, 1},
-        {0, 3, 0, 0, 9, 0, 4, 0, 5},
-        {0, 0, 5, 7, 8, 0, 0, 0, 0},
-        {0, 5, 6, 8, 0, 0, 2, 0, 0},
-        {0, 0, 0, 5, 0, 0, 0, 3, 0},
-        {0, 2, 0, 0, 3, 0, 0, 6, 8},
-        {5, 4, 0, 6, 7, 8, 3, 0, 0},
-        {7, 0, 3, 9, 0, 0, 0, 0, 0},
-        {0, 6, 2, 0, 0, 0, 9, 0, 4}
-    };//Este tablero se usara para hacer la transformación de intercambiar números
+		{1, 3, 6, 4, 9, 2, 5, 8, 7},
+        {5, 9, 4, 7, 6, 8, 1, 3, 2},
+        {7, 2, 8, 3, 1, 5, 9, 6, 4},
+        {8, 6, 1, 5, 7, 4, 2, 9, 3},
+        {2, 7, 5, 9, 3, 1, 6, 4, 8},
+        {3, 4, 9, 2, 8, 6, 7, 1, 5},
+        {6, 5, 7, 1, 4, 3, 8, 2, 9},
+        {4, 8, 2, 6, 5, 9, 3, 7, 1},
+        {9, 1, 3, 8, 2, 7, 4, 5, 6}
+    };//Segundo tablero resuelto para generar nuevos juegos
+
+int tablero3[9][9]={
+		{4, 1, 3, 8, 2, 5, 6, 7, 9},
+        {5, 6, 7, 1, 4, 9, 8, 3, 2},
+        {2, 8, 9, 7, 3, 6, 1, 4, 5},
+        {1, 9, 5, 4, 6, 2, 7, 8, 3},
+        {7, 2, 6, 9, 8, 3, 5, 1, 4},
+        {3, 4, 8, 5, 1, 7, 2, 9, 6},
+        {8, 5, 1, 6, 9, 4, 3, 2, 7},
+        {9, 7, 2, 3, 5, 8, 4, 6, 1},
+        {6, 3, 4, 2, 7, 1, 9, 5, 8}
+    };//Tercer tablero resuelto para generar nuevos juegos
 
 int main() {
     JUEGO j;
 	int a,b,numero;
     int opcion,numJugadores,i=0;//la variable i es el indice con el que identificamos al jugador en el arreglo partidas
     int nuevoJuego;
+    j.num_modificaciones=0;
     char player[30];
     P("Ingrese la cantidad de jugadores: ");S("%d",&numJugadores);
     
@@ -90,7 +106,7 @@ int main() {
 				break;
 			case 3:
 				guardarPartida(partidas,i,&i,&j,partidas[i].nombre);
-				P("\nIngrese el nombre del nuevo jugador: ");
+				P("\nIngrese el nombre del nuevo jugador (No utilice espacios): ");
 				S("%s",&partidas[i].nombre);
 				strcpy(player,partidas[i].nombre);
 				system("cls");
@@ -100,12 +116,17 @@ int main() {
 				S("%d",&nuevoJuego);
 				switch(nuevoJuego){
 					case 6:
+						cargarPartida(&j,partidas[i].nombre);
 						break;
 					case 7:
 						rotaTablero(&j);//Función que rota el tablero inicial
 						break;
 					case 8:
-						intercambia_numeros(&j);
+						intercambia_numeros(&j);//Cambia numeros por otros
+						break;
+					case 9:
+						P("Haz seleccionado intercambiar filas y columnas.\n");
+						intercambia_filas_columnas(&j);//Intercambia filas y renglones para cada sección 3x3
 						break;
 				}
 				break;
@@ -135,9 +156,11 @@ int main() {
 			case 5:
 				system("cls");
 				break;
-			
-			case 9:
+			case 6:
+				cargarPartida(&j,partidas[i].nombre);
 				break;
+			case 10:
+				return 0;
 			default:
 				P("NO SELECCIONASTE UNA OPCION VALIDA.\n");
 				break;
@@ -157,7 +180,7 @@ int menu(char nombre[30]){
 	P("\nBienvenido al Sudoku! %s\n",nombre);
     P("\nPresione el numero indicado en las opciones del menu, presione 10 para salir.\n");
 	P("\nMENU DE JUEGO:\n 1-$ Ingresa valor al tablero.\n2-$ Imprimir estado actual del juego\n3-$ Guardar partida\n"
-	"4-$ Modificar casilla\n5-$ Borrar pantalla.\n10-$ SALIR.\n");
+	"4-$ Modificar casilla\n5-$ Borrar pantalla.\n6-$ Cargar partida.\n10-$ SALIR.\n");
 	P("$:");S("%d",&opc);
 	return opc;
 }
@@ -224,6 +247,7 @@ void ingresaNum(JUEGO *juego) {
             P("\n-------------------------------\n");
             P("Numero agregado exitosamente.\n");
             P("--------------------------------\n");
+            juego->num_modificaciones++;//aumenta en 1 el numero de modificaciones
         } 
 		else {
             P("El numero esta repetido o intentaste modificar una casilla inicial. Por favor, ingrese otro valor.\n");
@@ -238,38 +262,46 @@ void guardarPartida(JUEGO *partidas,int a,int *partidasGuardadas, JUEGO *juego,c
     strcpy(partidas[a].nombre, nombre);
     P("\n####----Partida guardada exitosamente.----####\n");
     
-    char filename[40];
     FILE *file;
-
-    // Construir el nombre del archivo con el nombre del jugador y un sufijo .txt
-    snprintf(filename, sizeof(filename),"%s.txt",nombre);
-
-    // Intentar abrir/crear el archivo en modo escritura
+    char filename[40];
+    snprintf(filename, sizeof(filename), "%s.txt", nombre);
     file = fopen(filename, "w");
-    if(file == NULL) {
+    if (file == NULL) {
         P("No se pudo abrir el archivo para guardar.\n");
         return;
     }
-
-    // Escribir el tablero en el archivo
-    for(int i = 0; i < 9; i++) {
-        for(int j = 0; j < 9; j++) {
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
             fprintf(file, "%d ", juego->tablero[i][j]);
         }
         fprintf(file, "\n");
     }
-
-    fclose(file); // Cerrar el archivo
+    fclose(file);
     P("Partida guardada exitosamente en %s.\n", filename);
 }
 
 void rotaTablero(JUEGO *juego){
+	
+	for(int i=0;i<9;i++)
+	for(int j=0;j<9;j++)
+	tablero_inicial[i][j]=tablero3[i][j];
 
 	for(int i=8;i>=0;i--){
     	for(int j=0;j<9;j++){
     		juego->tablero[j][8-i]=tablero_inicial[i][j];
 		}
 	}
+	
+	srand(time(NULL));
+    int casillas_borradas = 0;
+    while (casillas_borradas < 52) {
+        int fila = rand() % 10;
+        int columna = rand() % 10;
+        if (juego->tablero[fila][columna] != 0) {
+            juego->tablero[fila][columna] = 0;
+            casillas_borradas++;
+        }
+    }
 }
 
 void modifica_casilla(JUEGO *juego,int a,int b,int num){
@@ -332,7 +364,7 @@ void intercambia_numeros(JUEGO *juego){
 	establecer_tablero(juego);//Hacemos que el tablero de la estructura tome los valores del tablero inicial
 	for(int i=0;i<9;i++){
 		for(int j=0;j<9;j++){
-			juego->tablero[i][j]=tablero2[i][j];
+			juego->tablero[i][j]=tablero2[i][j];//Transformamos el tablero al tablero 2
 			
 			switch(juego->tablero[i][j]){
 				case 1:
@@ -364,7 +396,53 @@ void intercambia_numeros(JUEGO *juego){
 					break;
 			}
 		}
-	}	
+	}
+	srand(time(NULL));
+    int casillas_borradas = 0;
+    while (casillas_borradas < 52) {
+        int fila = rand() % 10;
+        int columna = rand() % 10;
+        if (juego->tablero[fila][columna] != 0) {
+            juego->tablero[fila][columna] = 0;
+            casillas_borradas++;
+        }
+    }	
 }
+
+void intercambia_filas_columnas(JUEGO *juego){
+	
+	int temp[9][9];
+	for(int i=0;i<9;i++)
+	for(int j=0;j<9;j++)
+	juego->tablero[i][j]=tablero3[i][j];
+	
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            for (int k = 0; k < 3; k++) {
+                for (int l = 0; l < 3; l++) {
+                    temp[i * 3 + k][j * 3 + l] = juego->tablero[j * 3 + l][i * 3 + k];
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            juego->tablero[i][j] = temp[i][j];
+        }
+    }
+    srand(time(NULL));
+    int casillas_borradas = 0;
+    while (casillas_borradas < 52) {
+        int fila = rand() % 10;
+        int columna = rand() % 10;
+        if (juego->tablero[fila][columna] != 0) {
+            juego->tablero[fila][columna] = 0;
+            casillas_borradas++;
+        }
+    }
+}
+
 
 
