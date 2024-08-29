@@ -1,3 +1,2 @@
 # Sudoku
-Brigada 5 Grupo 13
-Favor de agregar sus aportes en ramas distintas a la main. Con su nombre y una descripción detallada.
+El programa permite jugar sudouku a través de un programa en c. Además tus partidas pueden guardarse en un archivo de texto.
